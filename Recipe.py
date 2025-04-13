@@ -4,6 +4,7 @@ import json
 DEBUG = False
 
 
+
 def make():
 # Opening data file
     with open('data.json','r') as file:

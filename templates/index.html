@@ -31,6 +31,7 @@
     </style>
 </head>
 <body class="min-h-screen p-8">
+    <!-- Top Box with primary input/inventory-->
     <div class="max-w-6xl mx-auto bg-white pixelated-border p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Left Section: Input Form and Barcode Scanner -->
         <div class="space-y-6">
@@ -96,7 +97,26 @@
                 {% endfor %}
             </ul>
         </div>
+        <!-- Bottom box with primitive recipe production-->
+    <div class="pixelated-shadow">
+        <h2 class="text-3xl font-semibold text-blue-600 overflow-x-auto">Recipe Suggestion 🍗</h2>
+        <p class="text-md italic text-green-700">"This might take a while..."</p>
+            <ul class="space-y-3 overflow-x-auto overflow-y-auto">
+                <button id = "recipe" type="submit" class="w-full bg-yellow-300 text-green-700 font-semibold py-3 rounded-none hover:bg-yellow-200 transition">Generate Recipe</button>
+                    <li class="bg-blue-50 border-l-[4px] border-blue-200 p-5 rounded-none shadow-none">
+                        <h3 class = "text-3xl text-blue-600">Title:</h3>
+                        <div id="title"></div>
+                        <h3 class = "text-3xl text-blue-600">Ingredients:</h3>
+                        <div id="ingredients"></div>
+                        <h3 class = "text-3xl text-blue-600">Directions:</h3>
+                        <div id="directions"></div>
+                    </li>
+            </ul>
+        </div>
     </div>
+
+    
+
     <!-- JavaScript to handle barcode input lookup. this could be totally wrong but this is what youtube said :) -->
     <script>
         const barcodeInput = document.getElementById('barcode-input');
@@ -127,6 +147,21 @@
                     // Show fallback message if product not recognized
                     message.classList.remove('hidden');
                 }
+            }
+        });
+        const rescipeText = document.getElementById('recipe')
+        const title = document.getElementById('title')
+        const ingredients = document.getElementById('ingredients')
+        const directions = document.getElementById('directions')
+        recipe.addEventListener('click' , async () => {
+            try {
+                const response = await fetch('/recipe');
+                const Rdata = await response.json();
+                document.getElementById('title').innerText = Rdata.title;
+                document.getElementById('ingredients').innerText = Rdata.ingredients;
+                document.getElementById('directions').innerText = Rdata.directions;
+            } catch (error) {
+                console.error('Error:', error);
             }
         });
     </script>
