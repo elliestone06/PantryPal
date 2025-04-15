@@ -1,18 +1,14 @@
-from transformers import FlaxAutoModelForSeq2SeqLM, AutoTokenizer
+from google import genai
 import json
 
 DEBUG = False
 
-
+client = genai.Client(api_key="AIzaSyCOiJUmQMDmEVS2Q7AIQYD4rgsaev5KzBg")
 
 def make():
 # Opening data file
     with open('data.json','r') as file:
         data = json.load(file)
-
-    # Load model and tokenizer
-    model = FlaxAutoModelForSeq2SeqLM.from_pretrained("flax-community/t5-recipe-generation")
-    tokenizer = AutoTokenizer.from_pretrained("flax-community/t5-recipe-generation")
 
     # making list of item names and formatting to work with the generator
     items = []
@@ -23,47 +19,28 @@ def make():
     if DEBUG:
         print(items)
 
-
-    # Format input
-    input_text = f"items: {items}"
-
-    # Tokenize
-    inputs = tokenizer(
-        input_text,
-        max_length=256,
-        padding="max_length",
-        truncation=True,
-        return_tensors="jax"
+    # Asking Gemini API for a recipe in a useable format
+    response = client.models.generate_content(
+    model="gemini-2.0-flash", contents=f"Generate a recipe using these ingredients: {items}. Only have Title, Ingredients, and Directions sections without any added fluff or sentences"
     )
 
-    # Generate
-    output_ids = model.generate(
-        inputs.input_ids,
-        attention_mask=inputs.attention_mask,
-        max_length=512,
-        do_sample=True,
-        top_p=0.95
-    ).sequences
+    if DEBUG:
+        print(response.text)    
 
+    # formatting!!!
+    title = str(response.text[:response.text.index("\n")])
+    title= title.strip("*")
 
-    # Decode
-    recipe = str(tokenizer.decode(output_ids[0], skip_special_tokens=True))
+    ingredients = str(response.text[response.text.index("**Ingredients:**\n")+16:response.text.index("\n**Directions:**")])
+    ingredients = ingredients.strip()
 
-    #formatting!! Making the different parts of the recipe into individual variables
-    title = recipe[recipe.index("title:") + 7 : recipe.index("ingredients: ")]
-    ingredients = recipe[recipe.index("ingredients:") + 13: recipe.index("directions: ")]
-    directions = recipe[recipe.index("directions:")+12:]
+    directions = str(response.text[response.text.index("**Directions:**\n")+15:])
+    directions = directions.strip()
 
     if DEBUG:
-        print(f"{title}\n\n{ingredients}\n\n{directions}")
+        print(title)
+        print(ingredients)
+        print(directions)
 
     return title, ingredients, directions
-
-
-
-
-############### How to use Function ##############
-#import Recipe
-
-#title, ingredients, directions = Recipe.make()
-
+make()
