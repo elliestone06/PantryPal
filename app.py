@@ -2,8 +2,10 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 import requests
 import json
 import os
+import Recipe as recipe
 from datetime import datetime
 from collections import defaultdict
+
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -142,7 +144,18 @@ def lookup_barcode():
         })
     except Exception as e:
         print("Open Food Facts API error:", e)
+        return jsonify({}), 500  # Internal server error
+    
+@app.route("/recipe")
+def makeRecipe():
+    title, ingredients, directions = recipe.make()
+    return jsonify({
+        "title": title,
+        "ingredients": ingredients,
+        "directions" : directions
+    })
         return jsonify({}), 500
+
 
 if __name__ == "__main__":
     # Run the app in debug mode for development/testing

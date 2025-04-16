@@ -1,7 +1,17 @@
 [
     {
-        "name": "Avocados",
-        "category": "Produce",
-        "expiration": "2025-04-17"
+        "name": "Milk",
+        "category": "Dairy",
+        "expiration": ""
+    },
+    {
+        "name": "Eggs",
+        "category": "Dairy",
+        "expiration": ""
+    },
+    {
+        "name": "Butter",
+        "category": "Dairy",
+        "expiration": "2025-04-19"
     }
 ]

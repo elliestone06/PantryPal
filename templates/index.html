@@ -1,3 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PantryPal</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Pixel Font -->
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'VT323', monospace;
+            background: repeating-linear-gradient(
+                to bottom,
+                #ccc,
+                #ccc 10px,
+                #aaa 10px,
+                #aaa 20px
+            );
+        }
+        /* Pixelated border effect */
+        .pixelated-border {
+            border: 2px solid #666;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        /* Pixelated shadow effect */
+        .pixelated-shadow {
+            box-shadow: 0 2px 0 #666, 0 4px 0 #666, 0 6px 0 #666, 0 8px 0 #666, 0 10px 0 #666;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-8">
+    <!-- Top Box with primary input/inventory-->
+    <div class="max-w-6xl mx-auto bg-white pixelated-border p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Left Section: Input Form and Barcode Scanner -->
+        <div class="space-y-6">
+            <h1 class="text-4xl font-bold text-green-700">PantryPal 📦</h1>
+            <!-- Form for adding items manually -->
+            <form action="/add" method="POST" class="space-y-4" id="grocery-form">
+                <!-- Item name input -->
+                <input id="item" name="item" placeholder="Item name" required
+                       class="w-full p-3 border border-green-200 rounded-none bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-300">
+                <!-- Category input (drop-down menu with categories) -->
+                <select id="category" name="category" required
+                        class="w-full p-3 border border-green-200 rounded-none bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-300">
+                    <option value="">Select Category</option>
+                    <option value="Dairy">Dairy 🥛</option>
+                    <option value="Produce">Produce 🍎</option>
+                    <option value="Meat">Meat 🍖</option>
+                    <option value="Frozen">Frozen ❄️</option>
+                    <option value="Grains">Grains 🌾</option>
+                    <option value="Beverages">Beverages 🥤</option>
+                    <option value="Snacks">Snacks 🍪</option>
+                    <option value="Canned Goods">Canned Goods 🥫</option>
+                </select>
+                <!-- Expiration date input (always entered manually) -->
+                <input name="expiration" type="date"
+                       class="w-full p-3 border border-green-200 rounded-none bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-300">
+                <!-- Submit button with a green check icon -->
+                <button type="submit"
+                        class="w-full bg-yellow-300 text-green-700 font-semibold py-3 rounded-none hover:bg-yellow-200 transition">
+                    <span class="text-green-600">✔️</span> Add Item
+                </button>
+            </form>
+            <!-- Barcode scanner input (acts like a keyboard input field) could be wrong but we will test!!!!!-->
+            <div class="pt-4">
+                <input id="barcode-input" placeholder="Scan barcode here..."
+                       class="w-full p-3 border border-blue-200 rounded-none bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                <!-- Error message that shows when barcode lookup fails -->
+                <p id="barcode-message" class="text-red-500 text-sm mt-2 hidden">
+                    Not enough information - please enter manually 🥺
+                </p>
+            </div>
+        </div>
+        <!-- Right Section: List of items added -->
+        <div class="pixelated-shadow">
+            <h2 class="text-3xl font-semibold text-yellow-600 mb-4">Inventory📝</h2>
+            <!-- Scrollable list of current grocery items -->
+            <ul class="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
+                {% for item in items %}
+                    <li class="bg-yellow-50 border-l-[4px] border-yellow-200 p-4 rounded-none shadow-none">
+                        <div>
+                            <!-- Display item name -->
+                            <p class="text-xl font-bold text-yellow-700">{{ item.name }}</p>
+                            <!-- Display item category -->
+                            <p class="text-md italic text-green-700">{{ item.category }}</p>
+                            <!-- Display expiration date if provided -->
+                            {% if item.expiration %}
+                                <p class="text-sm text-gray-700">🗓 Expires: {{ item.expiration }}</p>
+                            {% endif %}
+                        </div>
+                        <!-- Delete button to remove an item -->
+                        <a href="{{ url_for('remove_item', item_index=loop.index0) }}"
+                           class="text-red-500 hover:text-red-700 font-bold text-lg float-right -mt-[20px]">❌</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <!-- Bottom box with primitive recipe production-->
+    <div class="pixelated-shadow">
+        <h2 class="text-3xl font-semibold text-blue-600 overflow-x-auto">Recipe Suggestion 🍗</h2>
+        <p class="text-md italic text-green-700">"This might take a while..."</p>
+            <ul class="space-y-3 overflow-x-auto overflow-y-auto">
+                <button id = "recipe" type="submit" class="w-full bg-yellow-300 text-green-700 font-semibold py-3 rounded-none hover:bg-yellow-200 transition">Generate Recipe</button>
+                    <li class="bg-blue-50 border-l-[4px] border-blue-200 p-5 rounded-none shadow-none">
+                        <h3 class = "text-3xl text-blue-600">Title:</h3>
+                        <div id="title"></div>
+                        <h3 class = "text-3xl text-blue-600">Ingredients:</h3>
+                        <div id="ingredients"></div>
+                        <h3 class = "text-3xl text-blue-600">Directions:</h3>
+                        <div id="directions"></div>
+                    </li>
+            </ul>
+        </div>
+    </div>
+
+    
+
+    <!-- JavaScript to handle barcode input lookup. this could be totally wrong but this is what youtube said :) -->
+    <script>
+        const barcodeInput = document.getElementById('barcode-input');
+        const itemInput = document.getElementById('item');
+        const categoryInput = document.getElementById('category');
+        const message = document.getElementById('barcode-message');
+        // When user hits Enter after scanning a barcode
+        barcodeInput.addEventListener('keypress', async function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent form submission
+                const barcode = barcodeInput.value.trim(); // Get scanned barcode
+                barcodeInput.value = ""; // Clear input field
+                if (!barcode) return;
+                // Call backend lookup route to query Open Food Facts
+                const res = await fetch(`/lookup?barcode=${barcode}`);
+                if (!res.ok) {
+                    // Show message if item was not found
+                    message.classList.remove('hidden');
+                    return;
+                }
+                const data = await res.json();
+                // If we found at least name or category, fill the form
+                if (data.name || data.category) {
+                    itemInput.value = data.name || "";
+                    categoryInput.value = data.category || "";
+                    message.classList.add('hidden'); // Hide error message
+                } else {
+                    // Show fallback message if product not recognized
+                    message.classList.remove('hidden');
+                }
+            }
+        });
+        const rescipeText = document.getElementById('recipe')
+        const title = document.getElementById('title')
+        const ingredients = document.getElementById('ingredients')
+        const directions = document.getElementById('directions')
+        recipe.addEventListener('click' , async () => {
+            try {
+                const response = await fetch('/recipe');
+                const Rdata = await response.json();
+                document.getElementById('title').innerText = Rdata.title;
+                document.getElementById('ingredients').innerText = Rdata.ingredients;
+                document.getElementById('directions').innerText = Rdata.directions;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html> 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -112,3 +282,4 @@
     </script>
 </body>
 </html>
+
