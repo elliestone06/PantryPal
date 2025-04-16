@@ -21,7 +21,7 @@ def make():
 
     # Asking Gemini API for a recipe in a useable format
     response = client.models.generate_content(
-    model="gemini-2.0-flash", contents=f"Generate a recipe using these ingredients: {items}. Only have Title, Ingredients, and Directions sections without any added fluff or sentences"
+    model="gemini-2.0-flash", contents=f"Generate a recipe using these ingredients: {items}. Only have Title, Ingredients, and Directions sections without any added fluff or sentences. Not all ingredients must be used."
     )
 
     if DEBUG:
