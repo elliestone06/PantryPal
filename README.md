@@ -6,11 +6,12 @@ Features so far.
 4. You can delete an item from the list by clicking the "X" button next to it.
 5. The list automatically saves to the data.json file as itis edited or updated.
 6. not sure if it works yet, but it shouldddd be able to take in the barcode scan as a keyboard input, and it should get info from open food api.
+7. Login/Register functions
+8. Functional recipe generator that takes items in inventory and searches for recipes using API
 
 
 FUTURE EDITS 
 1. sort items by expiration date
 2. test barcode scanner and update as needed
 3. add notifcation system
-4. integrate recipe api
-5. Create some sort of sign in and profile
+4. Polish the sign up/sign in/view account htmls
