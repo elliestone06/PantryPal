@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'VT323', monospace;
+            background: repeating-linear-gradient(
+                to bottom,
+                #ADA96E,
+                #ADA96E 10px,
+                #C9C7B9 10px,
+                #C9C7B9 20px
+            );
+        }
+        .pixelated-border {
+            border: 2px solid #666;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        .pixelated-shadow {
+            box-shadow: 0 2px 0 #666, 0 4px 0 #666, 0 6px 0 #666, 0 8px 0 #666, 0 10px 0 #666;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="text-4xl font-bold text-green-700">Login</h1>
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.email.label }}
+            {{ form.email }}
+        </div>
+        <div>
+            {{ form.password.label }}
+            {{ form.password }}
+        </div>
+        <div>
+            <button type="submit">{{ form.submit }}</button>
+        </div>
+    </form>
+    
+    <!-- Add Register Button -->
+    <div>
+        <p style="font-size: 20px">Don't have an account? <a href="{{ url_for('register') }}" style="color: blue;">Register Here</a></p>
+    </div>
+</body>
+</html>
