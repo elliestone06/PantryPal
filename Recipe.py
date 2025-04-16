@@ -29,7 +29,7 @@ def make():
 
     # formatting!!!
     title = str(response.text[:response.text.index("\n")])
-    title= title.strip("*")
+    title= title.strip("*").strip("#")
 
     ingredients = str(response.text[response.text.index("**Ingredients:**\n")+16:response.text.index("\n**Directions:**")])
     ingredients = ingredients.strip()
