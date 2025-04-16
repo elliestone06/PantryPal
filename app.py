@@ -3,119 +3,146 @@ import requests
 import json
 import os
 import Recipe as recipe
+from datetime import datetime
+from collections import defaultdict
 
-# Create the Flask app instance
+
+# Initialize the Flask application
 app = Flask(__name__)
 
-# Path to the file that will store grocery items (this simulates a database)
+# Define the path to the JSON file that will store grocery items
+# This serves as a lightweight persistent storage
 data_file = 'data.json'
 
-# Function to load the items from our data file when the app starts
 def load_items():
     """
-    This function is responsible for loading the saved grocery list items from
-    the data.json file. If the file exists, it reads the JSON data and returns it.
-    If the file doesn't exist (for the first run or after deletion), it returns an empty list.
-    """
-    if os.path.exists(data_file):  # Check if the data.json file exists
-        with open(data_file, 'r') as file:
-            return json.load(file)  # Read and return the list of items from the file
-    return []  # If the file doesn't exist, return an empty list
+    Load items from the data file (data.json).
+    If the file exists, it reads the content and parses the JSON into a Python list.
+    If the file doesn't exist, it returns an empty list.
 
-# Function to save the current list of items into the data file
+    Returns:
+        list: A list of grocery items.
+    """
+    if os.path.exists(data_file):
+        with open(data_file, 'r') as file:
+            return json.load(file)
+    return []
+
 def save_items():
     """
-    This function is responsible for saving the current grocery list to the
-    data.json file. It serializes the items into JSON format and writes them to the file.
+    Save the current list of grocery items to the data file (data.json).
+    Converts the list to JSON format and writes it to the file.
     """
     with open(data_file, 'w') as file:
-        json.dump(items, file, indent=4)  # Save the items list to the file in a human-readable format
+        json.dump(items, file, indent=4)
 
-# Load the items from the data file when the app starts up
+# Load items when the application starts
 items = load_items()
 
 @app.route("/")
 def index():
     """
-    This route handles the display of the main page of the app. It passes the list
-    of grocery items to the HTML template so that users can view their saved items.
+    Render the main index page, showing all grocery items organized by category and name.
+    Items with the same name are grouped together and their expiration dates listed.
+
+    Returns:
+        str: Rendered HTML page with categorized grocery data.
     """
-    return render_template("index.html", items=items)  # Pass the current list of items to the template
+    # Dictionary structure: {category: {name: [ {expiration, index}, ... ]}}
+    categorized = defaultdict(lambda: defaultdict(list))
+
+    for i, item in enumerate(items):
+        category = item.get("category", "Unknown")
+        name = item.get("name", "Unnamed")
+        expiration = item.get("expiration", "")
+        categorized[category][name].append({"expiration": expiration, "index": i})
+
+    # Sort expiration dates for each grouped item
+    for category in categorized:
+        for name in categorized[category]:
+            categorized[category][name].sort(
+                key=lambda entry: datetime.strptime(entry["expiration"], "%Y-%m-%d") if entry["expiration"] else datetime.max
+            )
+
+    # Sort categories alphabetically for display
+    sorted_categorized = dict(sorted(categorized.items()))
+
+    return render_template("index.html", categorized_items=sorted_categorized)
 
 @app.route("/add", methods=["POST"])
 def add_item():
     """
-    This route handles the form submission when a user adds a new item manually.
-    The item name, category, and expiration date are extracted from the form, formatted,
-    and added to the in-memory list of items. After adding the item, the list is saved
-    to the data.json file to preserve the new item across restarts.
+    Handle the form submission to add a new grocery item.
+    Extracts the item name, category, and expiration date from the form data,
+    adds it to the item list, and saves the list to the data file.
+
+    Returns:
+        Response: Redirects to the index page.
     """
-    # Extract item details from the form input, ensuring capitalization for consistency
-    name = request.form.get("item", "").strip().title()  # Capitalize the item name
-    category = request.form.get("category", "").strip().title()  # Capitalize the category (shoudln't matter because it's a dropdown)
-    expiration = request.form.get("expiration", "").strip()  # Extract the expiration date
+    name = request.form.get("item", "").strip().title()
+    category = request.form.get("category", "").strip().title()
+    expiration = request.form.get("expiration", "").strip()
 
-    # Add the new item to the list
     items.append({"name": name, "category": category, "expiration": expiration})
-
-    # Save the updated list of items to the data file
     save_items()
 
-    # Redirect back to the index page
     return redirect(url_for("index"))
 
 @app.route("/remove/<int:item_index>")
 def remove_item(item_index):
     """
-    This route handles the deletion of an item from the grocery list.
-    The item is removed from the in-memory list using the given index.
-    After removing the item, the updated list is saved back to the data file.
-    """
-    # Make sure the index is valid before trying to remove the item
-    if 0 <= item_index < len(items):
-        items.pop(item_index)  # Remove the item by index
-        save_items()  # Save the updated list to data.json
+    Remove a grocery item based on its index in the list.
+    Ensures the index is valid before removing the item and then saves the updated list.
 
-    # Redirect to the main page to refresh the list
+    Args:
+        item_index (int): Index of the item to remove.
+
+    Returns:
+        Response: Redirects to the index page.
+    """
+    if 0 <= item_index < len(items):
+        items.pop(item_index)
+        save_items()
+
     return redirect(url_for("index"))
 
 @app.route("/lookup")
 def lookup_barcode():
     """
-    This route is triggered by a barcode scan. It queries the Open Food Facts API
-    to fetch product details based on the barcode and returns the product's name, category,
-    and a blank expiration field to be filled manually.
+    Perform a barcode lookup using the Open Food Facts API.
+    This is used when a user scans a barcode; the function tries to fetch the
+    product name and category from the API based on the scanned barcode.
+
+    Returns:
+        JSON: Product name, category, and a blank expiration field.
+        Response codes:
+            200 - Success
+            400 - Bad request (no barcode provided)
+            404 - Product not found
+            500 - Internal server/API error
     """
     barcode = request.args.get("barcode")
     if not barcode:
-        return jsonify({}), 400  # Bad request if no barcode is passed
+        return jsonify({}), 400
 
     try:
-        # Construct the URL to hit the Open Food Facts API using the scanned barcode
         url = f"https://world.openfoodfacts.org/api/v0/product/{barcode}.json"
         response = requests.get(url)
         data = response.json()
 
-        # If product is not found in the API
         if data.get("status") != 1:
             return jsonify({}), 404
 
         product = data.get("product", {})
-
-        # Get the product name (or empty if not found)
         name = product.get("product_name", "")
-
-        # Get the first category tag (removing language prefix) or empty if missing
         category = product.get("categories_tags", [""])[0].replace("en:", "").title() if product.get("categories_tags") else ""
 
-        # Return the name and category to prefill the form. Expiration is left blank as Open Food Facts doesn’t provide it.
         return jsonify({
             "name": name,
             "category": category,
-            "expiration": ""  # Expiration date must still be entered manually
+            "expiration": ""
         })
     except Exception as e:
-        # Print any errors to the terminal for debugging
         print("Open Food Facts API error:", e)
         return jsonify({}), 500  # Internal server error
     
@@ -127,7 +154,9 @@ def makeRecipe():
         "ingredients": ingredients,
         "directions" : directions
     })
+        return jsonify({}), 500
+
 
 if __name__ == "__main__":
-    # Run the app in debug mode (useful for development and testing)
+    # Run the app in debug mode for development/testing
     app.run(debug=True)
