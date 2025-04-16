@@ -1,17 +1,22 @@
 [
     {
+        "name": "Avocado",
+        "category": "Produce",
+        "expiration": "2025-04-24"
+    },
+    {
+        "name": "Avocado",
+        "category": "Produce",
+        "expiration": "2025-04-18"
+    },
+    {
         "name": "Milk",
         "category": "Dairy",
-        "expiration": ""
+        "expiration": "Unknown"
     },
     {
-        "name": "Eggs",
+        "name": "Milk",
         "category": "Dairy",
-        "expiration": ""
-    },
-    {
-        "name": "Butter",
-        "category": "Dairy",
-        "expiration": "2025-04-19"
+        "expiration": "2025-04-22"
     }
 ]

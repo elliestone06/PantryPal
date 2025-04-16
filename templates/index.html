@@ -78,24 +78,26 @@
 <div class="pixelated-shadow">
     <h2 class="text-3xl font-semibold text-yellow-600 mb-4">Inventory 📝</h2>
     <ul class="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
-        {% for category, items_by_name in categorized_items.items() %}
-            <h3 class="text-2xl text-green-800 font-bold">{{ category }}</h3>
-            {% for name, item_group in items_by_name.items() %}
+        {% for category, grouped_items in categorized_items.items() %}
+  <h3 class="text-2xl font-bold text-green-800">{{ category }}</h3>
+  {% for name, item_group in grouped_items.items() %}
+    <li class="bg-yellow-50 border-l-[4px] border-yellow-200 p-4 rounded-none shadow-none mb-2">
+        <div>
+            <p class="text-xl font-bold text-yellow-700">{{ name }}</p>
+            <p class="text-md italic text-green-700">{{ category }}</p>
+            <ul class="ml-4 mt-2 list-disc text-sm text-gray-700">
                 {% for item in item_group %}
-                    <li class="bg-yellow-50 border-l-[4px] border-yellow-200 p-4 rounded-none shadow-none">
-                        <div>
-                            <p class="text-xl font-bold text-yellow-700">{{ item.name }}</p>
-                            <p class="text-md italic text-green-700">{{ item.category }}</p>
-                            {% if item.expiration %}
-                                <p class="text-sm text-gray-700">🗓 Expires: {{ item.expiration }}</p>
-                            {% endif %}
-                        </div>
-                        <a href="{{ url_for('remove_item', item_index=item.index) }}"
-                           class="text-red-500 hover:text-red-700 font-bold text-lg float-right -mt-[20px]">❌</a>
+                    <li>
+                        🗓 Expires: {{ item.expiration }}
+                        <a href="{{ url_for('remove_item', item_index=item.index) }}" class="text-red-500 hover:text-red-700 ml-2">❌</a>
                     </li>
                 {% endfor %}
-            {% endfor %}
-        {% endfor %}
+            </ul>
+        </div>
+    </li>
+  {% endfor %}
+{% endfor %}
+
     </ul>
 </div>
 
