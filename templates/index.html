@@ -75,29 +75,31 @@
             </div>
         </div>
         <!-- Right Section: List of items added -->
-        <div class="pixelated-shadow">
-            <h2 class="text-3xl font-semibold text-yellow-600 mb-4">Inventory📝</h2>
-            <!-- Scrollable list of current grocery items -->
-            <ul class="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
-                {% for item in items %}
+<div class="pixelated-shadow">
+    <h2 class="text-3xl font-semibold text-yellow-600 mb-4">Inventory 📝</h2>
+    <ul class="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
+        {% for category, items_by_name in categorized_items.items() %}
+            <h3 class="text-2xl text-green-800 font-bold">{{ category }}</h3>
+            {% for name, item_group in items_by_name.items() %}
+                {% for item in item_group %}
                     <li class="bg-yellow-50 border-l-[4px] border-yellow-200 p-4 rounded-none shadow-none">
                         <div>
-                            <!-- Display item name -->
                             <p class="text-xl font-bold text-yellow-700">{{ item.name }}</p>
-                            <!-- Display item category -->
                             <p class="text-md italic text-green-700">{{ item.category }}</p>
-                            <!-- Display expiration date if provided -->
                             {% if item.expiration %}
                                 <p class="text-sm text-gray-700">🗓 Expires: {{ item.expiration }}</p>
                             {% endif %}
                         </div>
-                        <!-- Delete button to remove an item -->
-                        <a href="{{ url_for('remove_item', item_index=loop.index0) }}"
+                        <a href="{{ url_for('remove_item', item_index=item.index) }}"
                            class="text-red-500 hover:text-red-700 font-bold text-lg float-right -mt-[20px]">❌</a>
                     </li>
                 {% endfor %}
-            </ul>
-        </div>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+</div>
+
+
         <!-- Bottom box with primitive recipe production-->
     <div class="pixelated-shadow">
         <h2 class="text-3xl font-semibold text-blue-600 overflow-x-auto">Recipe Suggestion 🍗</h2>
@@ -168,118 +170,3 @@
     </script>
 </body>
 </html> 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>PantryPal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'VT323', monospace;
-            background: repeating-linear-gradient(
-                to bottom,
-                #ADA96E,
-                #ADA96E 10px,
-                #C9C7B9 10px,
-                #C9C7B9 20px
-            );
-        }
-        .pixelated-border {
-            border: 2px solid #666;
-            border-radius: 0;
-            box-shadow: none;
-        }
-        .pixelated-shadow {
-            box-shadow: 0 2px 0 #666, 0 4px 0 #666, 0 6px 0 #666, 0 8px 0 #666, 0 10px 0 #666;
-        }
-    </style>
-</head>
-<body class="min-h-screen p-4">
-    <div class="w-full max-w-6xl bg-white pixelated-border p-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-start justify-start">
-        <!-- Left Panel -->
-        <div class="space-y-6">
-            <h1 class="text-4xl font-bold text-green-700">PantryPal 📦</h1>
-            <form action="/add" method="POST" class="space-y-4">
-                <input id="item" name="item" placeholder="Item name" required class="w-full p-3 border border-green-200 bg-green-50">
-                <select id="category" name="category" required class="w-full p-3 border border-green-200 bg-green-50">
-                    <option value="">Select Category</option>
-                    <option value="Dairy">Dairy 🥛</option>
-                    <option value="Produce">Produce 🍎</option>
-                    <option value="Meat">Meat 🍖</option>
-                    <option value="Frozen">Frozen ❄️</option>
-                    <option value="Grains">Grains 🌾</option>
-                    <option value="Beverages">Beverages 🥤</option>
-                    <option value="Snacks">Snacks 🍪</option>
-                    <option value="Canned Goods">Canned Goods 🥫</option>
-                    <option value="Condiments">Condiments 🍯</option>
-                    <option value="Spices">Spices 🌶️</option>
-                    
-                </select>
-                <input name="expiration" type="date" class="w-full p-3 border border-green-200 bg-green-50">
-                <button type="submit" class="w-full bg-yellow-300 text-green-700 font-semibold py-3 hover:bg-yellow-200">✔️ Add Item</button>
-            </form>
-            <div class="pt-4">
-                <input id="barcode-input" placeholder="Scan barcode here..." class="w-full p-3 border border-blue-200 bg-blue-50">
-                <p id="barcode-message" class="text-red-500 text-sm mt-2 hidden">Not enough information - please enter manually 🥺</p>
-            </div>
-        </div>
-
-        <!-- Right Panel -->
-        <div class="pixelated-shadow">
-            <h2 class="text-3xl font-semibold text-yellow-600 mb-4">Inventory 📝</h2>
-            <ul class="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-                {% for category, items_by_name in categorized_items.items() %}
-                    <li class="text-xl font-bold text-green-800 border-b pb-1 mt-4">{{ category }}</li>
-                    {% for name, entries in items_by_name.items() %}
-                        <li class="bg-yellow-50 border-l-[4px] border-yellow-200 p-4">
-                            <div>
-                                <p class="text-xl font-bold text-yellow-700">
-                                    {{ name }} {% if entries|length > 1 %} ({{ entries|length }}){% endif %}
-                                </p>
-                                {% for entry in entries %}
-                                    {% if entry.expiration %}
-                                        <p class="text-sm text-gray-700">🗓 Expires: {{ entry.expiration }}</p>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        </li>
-                    {% endfor %}
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-
-    <script>
-        const barcodeInput = document.getElementById('barcode-input');
-        const itemInput = document.getElementById('item');
-        const categoryInput = document.getElementById('category');
-        const message = document.getElementById('barcode-message');
-
-        barcodeInput.addEventListener('keypress', async function (e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const barcode = barcodeInput.value.trim();
-                barcodeInput.value = "";
-                if (!barcode) return;
-
-                const res = await fetch(`/lookup?barcode=${barcode}`);
-                if (!res.ok) {
-                    message.classList.remove('hidden');
-                    return;
-                }
-                const data = await res.json();
-                if (data.name || data.category) {
-                    itemInput.value = data.name || "";
-                    categoryInput.value = data.category || "";
-                    message.classList.add('hidden');
-                } else {
-                    message.classList.remove('hidden');
-                }
-            }
-        });
-    </script>
-</body>
-</html>
-
