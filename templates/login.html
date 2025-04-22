@@ -28,16 +28,6 @@
     </style>
 </head>
 <body>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <ul>
-      {% for category, message in messages %}
-        <li class="text-red-600">{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
-
     <h1 class="text-4xl font-bold text-green-700">Login</h1>
     <form method="POST" action="">
         {{ form.hidden_tag() }}

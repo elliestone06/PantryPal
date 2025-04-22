@@ -138,9 +138,10 @@ def index():
             return datetime.strptime(date_str, "%Y-%m-%d")
         except (ValueError, TypeError):
             return datetime.max
-
-    categorized[category][name].sort(
-        key=lambda entry: safe_parse_date(entry["expiration"])
+    for category in categorized:
+        for name in categorized[category]:
+            categorized[category][name].sort(
+                key=lambda entry: safe_parse_date(entry["expiration"])
     )
     # Sort categories alphabetically for display
     sorted_categorized = dict(sorted(categorized.items()))
