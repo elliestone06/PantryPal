@@ -114,6 +114,7 @@ def save_items():
 items = load_items()
 
 @app.route("/index")
+@login_required
 def index():
     """
     Render the main index page, showing all grocery items organized by category and name.
