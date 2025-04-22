@@ -132,12 +132,15 @@ def index():
         categorized[category][name].append({"expiration": expiration, "index": i})
 
     # Sort expiration dates for each grouped item
-    for category in categorized:
-        for name in categorized[category]:
-            categorized[category][name].sort(
-                key=lambda entry: datetime.strptime(entry["expiration"], "%Y-%m-%d") if entry["expiration"] else datetime.max
-            )
+    def safe_parse_date(date_str):
+        try:
+            return datetime.strptime(date_str, "%Y-%m-%d")
+        except (ValueError, TypeError):
+            return datetime.max
 
+    categorized[category][name].sort(
+        key=lambda entry: safe_parse_date(entry["expiration"])
+    )
     # Sort categories alphabetically for display
     sorted_categorized = dict(sorted(categorized.items()))
 
