@@ -11,6 +11,7 @@ import os
 import email_validator
 from datetime import datetime
 from collections import defaultdict
+import Recipe as recipe
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -227,6 +228,15 @@ def lookup_barcode():
         print("Open Food Facts API error:", e)
         return jsonify({}), 500
     
+@app.route("/recipe")
+def makeRecipe():
+    title, ingredients, directions = recipe.make()
+    return jsonify({
+        "title": title,
+        "ingredients": ingredients,
+        "directions" : directions
+    })
+
 @app.route("/account")
 @login_required
 def account():
