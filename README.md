@@ -8,10 +8,10 @@ Features so far.
 6. not sure if it works yet, but it shouldddd be able to take in the barcode scan as a keyboard input, and it should get info from open food api.
 7. Login/Register functions
 8. Functional recipe generator that takes items in inventory and searches for recipes using API
+9. sort items by expiration date
 
 
 FUTURE EDITS 
-1. sort items by expiration date
-2. test barcode scanner and update as needed
-3. add notifcation system
-4. Polish the sign up/sign in/view account htmls
+1. Phone/Rasberry Pi implementation
+2. add notifcation system
+3. Polish the sign up/sign in/view account htmls
