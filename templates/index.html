@@ -9,27 +9,33 @@
     <!-- Pixel Font -->
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'VT323', monospace;
-            background: repeating-linear-gradient(
-                to bottom,
-                #ccc,
-                #ccc 10px,
-                #aaa 10px,
-                #aaa 20px
-            );
-        }
-        /* Pixelated border effect */
-        .pixelated-border {
-            border: 2px solid #666;
-            border-radius: 0;
-            box-shadow: none;
-        }
-        /* Pixelated shadow effect */
-        .pixelated-shadow {
-            box-shadow: 0 2px 0 #666, 0 4px 0 #666, 0 6px 0 #666, 0 8px 0 #666, 0 10px 0 #666;
-        }
-    </style>
+  
+  body {
+    font-family: 'VT323', monospace;
+    background: repeating-linear-gradient(
+      to bottom,
+      #ccc, #ccc 10px,
+      #aaa 10px, #aaa 20px
+    );
+  }
+  .pixelated-border { … }
+  .pixelated-shadow { … }
+
+  @media (max-width: 480px) {
+    h1.text-4xl { font-size: 2rem ; }
+    h2.text-3xl { font-size: 1.5rem ; }
+    
+    body { padding: 1rem; }
+    .pixelated-border,
+    .pixelated-shadow {
+      padding: 0.5rem !important;
+    }
+
+    .grid > div { margin-bottom: 1.5rem; }
+
+    button { padding: 0.75rem 1rem; font-size: 0.9rem; }
+  }
+</style>
 </head>
 <body class="min-h-screen p-8">
     <!-- Top Box with primary input/inventory-->
