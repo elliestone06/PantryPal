@@ -12,10 +12,8 @@ import email_validator
 from datetime import datetime
 from collections import defaultdict
 import Recipe as recipe
-"""This file acts as the backend for our web page, handling things like loading items, generating recipes, creating an account, logging
-in and out, saving all the user input data, and the organization of the grocery items they enter."""
 
-"""This starts the Flask app and sets up the base line for the account system."""
+# Initialize the Flask application
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'peanut_goober'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
@@ -87,13 +85,18 @@ def logout():
     logout_user()
     flash('Logged out successfully!', 'info')
     return redirect(url_for('login'))
-""" This function runs when a user selects to log out, and it takes them to a new page where they can either close the
-    application or locate the option choose to log in again."""
 
+# Define the path to the JSON file that will store grocery items
+# This serves as a lightweight persistent storage
 data_file = 'data.json'
 def load_items():
     """
-    This loads the items from the json file. If it is empty it shows nothing, otherwise it shows the contents. New accounts start with an empty list.
+    Load items from the data file (data.json).
+    If the file exists, it reads the content and parses the JSON into a Python list.
+    If the file doesn't exist, it returns an empty list.
+
+    Returns:
+        list: A list of grocery items.
     """
     if os.path.exists(data_file):
         with open(data_file, 'r') as file:
@@ -102,33 +105,36 @@ def load_items():
 
 def save_items():
     """
-    Literally just uploads the item to the json file to be saved, as you delete or add items it will automatically update. I like that .dump is 
-    the right feature to use.
+    Save the current list of grocery items to the data file (data.json).
+    Converts the list to JSON format and writes it to the file.
     """
     with open(data_file, 'w') as file:
         json.dump(items, file, indent=4)
 
-"""This loads items when the app runs."""
+# Load items when the application starts
 items = load_items()
 
 @app.route("/index")
 @login_required
 def index():
     """
-    Items in the same category will be grouped together, and dislay the expiration date that is closest to expiring first.
+    Render the main index page, showing all grocery items organized by category and name.
+    Items with the same name are grouped together and their expiration dates listed.
+
+    Returns:
+        str: Rendered HTML page with categorized grocery data.
     """
-    """This creats the structure for the dictionary."""
+    # Dictionary structure: {category: {name: [ {expiration, index}, ... ]}}
     categorized = defaultdict(lambda: defaultdict(list))
 
-    """This is a simple for loop that gathers and separates the user input data for each item, preparing it for how it will be formatted in the index."""
     for i, item in enumerate(items):
         category = item.get("category", "Unknown")
         name = item.get("name", "Unnamed")
         expiration = item.get("expiration", "")
-        categorized[category][name].append({"expiration": expiration, "index": i})
+        quantity = item.get("quantity", "")
+        categorized[category][name].append({"expiration": expiration, "quantity": item.get("quantity", ""), "index": i})
 
-   """This makes it so that within every category, the one with the soonest expiration date will appear at the top of the list. Shoutout to classmates for
-   suggesting this."""
+    # Sort items within each category by name and expiration date
     def safe_parse_date(date_str):
         try:
             return datetime.strptime(date_str, "%Y-%m-%d")
@@ -139,8 +145,7 @@ def index():
             categorized[category][name].sort(
                 key=lambda entry: safe_parse_date(entry["expiration"])
     )
-   """This takes the things we just categorized and sorts them alphabetically. There isn't really a reason for this, we just thought it was cool to have extra 
-   organization."""
+    # Sort categories alphabetically for display. There is no need for this, but it gives us a chance to practice sorting.
     sorted_categorized = dict(sorted(categorized.items()))
 
     return render_template("index.html", categorized_items=sorted_categorized)
@@ -148,14 +153,13 @@ def index():
 @app.route("/add", methods=["POST"])
 @login_required
 def add_item():
-    """
-    This adds the entered item to the inventory using its expiration, category, and name data.
-    """
+    """Adds an item to the grocery list and separates its categories."""
     name = request.form.get("item", "").strip().title()
     category = request.form.get("category", "").strip().title()
     expiration = request.form.get("expiration", "").strip()
+    quantity = request.form.get("quantity", "").strip()
 
-    items.append({"name": name, "category": category, "expiration": expiration})
+    items.append({"name": name, "category": category, "expiration": expiration, "quantity": quantity})
     save_items()
 
     return redirect(url_for("index"))
@@ -164,7 +168,14 @@ def add_item():
 @login_required
 def remove_item(item_index):
     """
-    This removes the chosen item from the inventory using the pop function.
+    Remove a grocery item based on its index in the list.
+    Ensures the index is valid before removing the item and then saves the updated list.
+
+    Args:
+        item_index (int): Index of the item to remove.
+
+    Returns:
+        Response: Redirects to the index page.
     """
     if 0 <= item_index < len(items):
         items.pop(item_index)
@@ -173,10 +184,8 @@ def remove_item(item_index):
     return redirect(url_for("index"))
 
 @app.route("/lookup")
-def barcode_lookup():
-    """
-    This looks up a product if its barcode is stored in the API.
-    """
+def lookup_barcode():
+    """Looks up product if it's barcode is stored in the API."""
     barcode = request.args.get("barcode")
     if not barcode:
         return jsonify({}), 400
@@ -192,11 +201,14 @@ def barcode_lookup():
         product = data.get("product", {})
         name = product.get("product_name", "")
         category = product.get("categories_tags", [""])[0].replace("en:", "").title() if product.get("categories_tags") else ""
-
+        quantity = product.get("quantity", "")
+        if not name:
+            return jsonify({}), 404
         return jsonify({
             "name": name,
             "category": category,
-            "expiration": ""
+            "expiration": "",
+            "quantity": quantity
         })
     except Exception as e:
         print("Open Food Facts API error:", e)
