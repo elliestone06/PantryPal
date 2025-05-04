@@ -27,19 +27,26 @@
         }
     </style>
 </head>
-<body>
-    <h1 class="text-4xl font-bold text-green-700">Login</h1>
-    <form method="POST" action="">
+<!-- adding padding to the main divider-->
+<body class="min-h-screen p-8">
+    <div class="max-w-3xl mx-auto bg-yellow-50 pixelated-border p-8">
+        <div class="flex items-center justify-center my-6">
+            <!-- Title -- flex borders to fit screen width -->
+            <hr class="flex-grow border-t-2 border-green-700 mr-4"> <!--green borders for title-->
+            <h1 class="text-4xl font-bold text-green-700 whitespace-nowrap">Login</h1>
+            <hr class="flex-grow border-t-2 border-green-700 ml-4">
+        </div>
+    <form method="POST" action="" class="flex flex-col items-center space-y-6"> <!-- centering items in divider -->
         {{ form.hidden_tag() }}
-        <div>
+        <div class="w-full max-w-sm text-center">
             {{ form.email.label }}
             {{ form.email }}
         </div>
-        <div>
+        <div class="w-full max-w-sm text-center">
             {{ form.password.label }}
             {{ form.password }}
         </div>
-        <div>
+        <div class="w-full max-w-sm text-center">
             <button type="submit" class="bg-green-500 text-white px-6 py-2 pixelated-border">
                 {{ form.submit }}
             </button>
@@ -47,8 +54,9 @@
     </form>
     
     <!-- Add Register Button -->
-    <div>
+    <div class="text-center mt-6">
         <p style="font-size: 20px">Don't have an account? <a href="{{ url_for('register') }}" style="color: blue;">Register Here</a></p>
+    </div>
     </div>
 </body>
 </html>

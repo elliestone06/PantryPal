@@ -26,31 +26,38 @@
         }
     </style>
 </head>
-<body>
-    <h1 class="text-4xl font-bold text-green-700">Register</h1>
-    <form method="POST" action="">
+<body class="min-h-screen p-8"> <!-- adding padding to the main divider-->
+    <div class="max-w-3xl mx-auto bg-yellow-50 pixelated-border p-8">
+        <!-- Title -- flex borders to fit screen width -->
+        <div class="flex items-center justify-center my-6">
+            <hr class="flex-grow border-t-2 border-green-700 mr-4"> <!--green borders for title-->
+            <h1 class="text-4xl font-bold text-green-700 whitespace-nowrap">Register</h1>
+            <hr class="flex-grow border-t-2 border-green-700 ml-4">
+        </div>
+    <form method="POST" action="" class="flex flex-col items-center space-y-6">
         {{ form.hidden_tag() }}
-        <div>
+        <div class="w-full max-w-sm text-center">
             {{ form.username.label }}
             {{ form.username }}
         </div>
-        <div>
+        <div class="w-full max-w-sm text-center">
             {{ form.email.label }}
             {{ form.email }}
         </div>
-        <div>
+        <div class="w-full max-w-sm text-center">
             {{ form.password.label }}
             {{ form.password }}
         </div>
-        <div>
+        <div class="w-full max-w-sm text-center">
             {{ form.confirm_password.label }}
             {{ form.confirm_password }}
         </div>
-        <div>
+        <div class="w-full max-w-sm text-center">
             <button type="submit" class="bg-green-500 text-white px-6 py-2 pixelated-border">
                 {{ form.submit }}
             </button>
         </div>
     </form>
+    </div>
 </body>
 </html>
