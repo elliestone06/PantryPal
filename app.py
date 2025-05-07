@@ -89,6 +89,7 @@ def logout():
 # Define the path to the JSON file that will store grocery items
 # This serves as a lightweight persistent storage
 data_file = 'data.json'
+grocery_file = 'grocery.json'
 def load_items():
     """
     Load items from the data file (data.json).
@@ -103,6 +104,12 @@ def load_items():
             return json.load(file)
     return []
 
+def load_grocery():
+    if os.path.exists(grocery_file):
+        with open(grocery_file, 'r') as file:
+            return json.load(file)
+    return []
+
 def save_items():
     """
     Save the current list of grocery items to the data file (data.json).
@@ -111,8 +118,13 @@ def save_items():
     with open(data_file, 'w') as file:
         json.dump(items, file, indent=4)
 
-# Load items when the application starts
+def save_grocery():
+    with open(grocery_file, 'w') as file:
+        json.dump(grocery, file, indent = 4)
+
+# Load items and grocery list when the application starts
 items = load_items()
+grocery = load_grocery()
 
 @app.route("/index")
 @login_required
@@ -124,45 +136,60 @@ def index():
     Returns:
         str: Rendered HTML page with categorized grocery data.
     """
+    inventory_items = [item for item in items if item.get("list","Inventory") == "Inventory"]
+    cart_items = [item for item in items if item.get("list", "Cart") == "Cart"]
+
+    def categorize(items):
     # Dictionary structure: {category: {name: [ {expiration, index}, ... ]}}
-    categorized = defaultdict(lambda: defaultdict(list))
+        categorized = defaultdict(lambda: defaultdict(list))
 
-    for i, item in enumerate(items):
-        category = item.get("category", "Unknown")
-        name = item.get("name", "Unnamed")
-        expiration = item.get("expiration", "")
-        quantity = item.get("quantity", "")
-        categorized[category][name].append({"expiration": expiration, "quantity": item.get("quantity", ""), "index": i})
+        for i, item in enumerate(items):
+            category = item.get("category", "Unknown")
+            name = item.get("name", "Unnamed")
+            expiration = item.get("expiration", "")
+            quantity = item.get("quantity", "")
+            categorized[category][name].append({"expiration": expiration, "quantity": item.get("quantity", ""), "index": i})
 
-    # Sort items within each category by name and expiration date
-    def safe_parse_date(date_str):
-        try:
-            return datetime.strptime(date_str, "%Y-%m-%d")
-        except (ValueError, TypeError):
-            return datetime.max
-    for category in categorized:
-        for name in categorized[category]:
-            categorized[category][name].sort(
-                key=lambda entry: safe_parse_date(entry["expiration"])
-    )
-    # Sort categories alphabetically for display. There is no need for this, but it gives us a chance to practice sorting.
-    sorted_categorized = dict(sorted(categorized.items()))
+        # Sort items within each category by name and expiration date
+        def safe_parse_date(date_str):
+            try:
+                return datetime.strptime(date_str, "%Y-%m-%d")
+            except (ValueError, TypeError):
+                return datetime.max
+        for category in categorized:
+            for name in categorized[category]:
+                categorized[category][name].sort(
+                    key=lambda entry: safe_parse_date(entry["expiration"])
+        )
+        # Sort categories alphabetically for display. There is no need for this, but it gives us a chance to practice sorting.
+        return dict(sorted(categorized.items()))
+        
+    categorized_inventory = categorize(items)
+    categorized_cart = categorize(grocery)
 
-    return render_template("index.html", categorized_items=sorted_categorized)
+    return render_template("index.html", categorized_inventory=categorized_inventory, categorized_grocery = categorized_cart)
 
 @app.route("/add", methods=["POST"])
 @login_required
 def add_item():
-    """Adds an item to the grocery list and separates its categories."""
+    """Adds an item to the item list and separates its categories."""
     name = request.form.get("item", "").strip().title()
     category = request.form.get("category", "").strip().title()
     expiration = request.form.get("expiration", "").strip()
-    quantity = request.form.get("quantity", "").strip()
+    # quantity = request.form.get("quantity", "").strip()
+    list_choice = request.form['list']
 
-    items.append({"name": name, "category": category, "expiration": expiration, "quantity": quantity})
-    save_items()
-
+    if list_choice == "Inventory":
+        quantity = request.form.get("quantity", "").strip()
+        items.append({"name": name, "category": category, "expiration": expiration, "quantity": quantity})
+        save_items()
+    elif list_choice == "Cart":
+        quantity = 1
+        grocery.append({"name": name, "category": category, "expiration": expiration, "quantity": quantity})
+        save_grocery()
     return redirect(url_for("index"))
+
+
 
 @app.route("/remove/<int:item_index>")
 @login_required
@@ -180,6 +207,25 @@ def remove_item(item_index):
     if 0 <= item_index < len(items):
         items.pop(item_index)
         save_items()
+
+    return redirect(url_for("index"))
+
+@app.route("/remove_grocery/<int:grocery_index>")
+@login_required
+def remove_list_item(grocery_index):
+    """
+    Remove a grocery item based on its index in the list.
+    Ensures the index is valid before removing the item and then saves the updated list.
+
+    Args:
+        item_index (int): Index of the item to remove.
+
+    Returns:
+        Response: Redirects to the index page.
+    """
+    if 0 <= grocery_index < len(grocery):
+        grocery.pop(grocery_index)
+        save_grocery()
 
     return redirect(url_for("index"))
 
