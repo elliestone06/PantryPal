@@ -188,7 +188,8 @@ def add_item():
     list_choice = request.form['list']
 
     if list_choice == "Inventory":
-        quantity = request.form.get("quantity", "").strip()
+        quantity_input = request.form.get("quantity", "").strip()
+        quantity = quantity_input if quantity_input else "1"
         items.append({
             "name": name,
             "category": category,
