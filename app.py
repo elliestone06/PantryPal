@@ -210,6 +210,26 @@ def remove_item(item_index):
 
     return redirect(url_for("index"))
 
+@app.route('/change_quantity/<int:item_index>/<string:action>', methods=['POST'])
+def change_quantity(item_index, action):
+    item = dict(items[item_index])
+
+    quantity = int(item['quantity'])
+    if action == 'increase': # increase quantity
+        quantity += 1
+    elif action == 'decrease' and quantity > 0: # decrease quantity
+        quantity -= 1
+    
+
+    items[item_index]['quantity'] = str(quantity)
+    
+    if quantity == 0:
+        if 0 <= item_index < len(items):
+            items.pop(item_index)
+
+    save_items()  # function to persist changes
+    return redirect(url_for('index'))  
+
 @app.route("/remove_grocery/<int:grocery_index>")
 @login_required
 def remove_list_item(grocery_index):
