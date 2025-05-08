@@ -185,20 +185,29 @@ def add_item():
     name = request.form.get("item", "").strip().title()
     category = request.form.get("category", "").strip().title()
     expiration = request.form.get("expiration", "").strip()
-    # quantity = request.form.get("quantity", "").strip()
     list_choice = request.form['list']
 
     if list_choice == "Inventory":
         quantity = request.form.get("quantity", "").strip()
-        items.append({"name": name, "category": category, "expiration": expiration, "quantity": quantity})
+        items.append({
+            "name": name,
+            "category": category,
+            "expiration": expiration,
+            "quantity": quantity
+        })
         save_items()
+        
     elif list_choice == "Cart":
-        quantity = 1
-        grocery.append({"name": name, "category": category, "expiration": expiration, "quantity": quantity})
+        quantity_input = request.form.get("quantity", "").strip()
+        quantity = quantity_input if quantity input else "1"
+        grocery.append({
+            "name": name,
+            "category": category,
+            "expiration": expiration,
+            "quantity": quantity
+        })
         save_grocery()
     return redirect(url_for("index"))
-
-
 
 @app.route("/remove/<int:item_index>")
 @login_required
