@@ -205,7 +205,7 @@ def remove_item(item_index):
         Response: Redirects to the index page.
     """
     item = items[item_index]
-    if item['quantity'] > 1:
+    if item['quantity'] >= 1:
         item['quantity'] -= 1
     else:
         items.pop(item_index)
