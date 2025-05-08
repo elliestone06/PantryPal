@@ -204,11 +204,13 @@ def remove_item(item_index):
     Returns:
         Response: Redirects to the index page.
     """
-    if 0 <= item_index < len(items):
+    item = items[item_index]
+    if item['quantity'] > 1:
+        item['quantity'] -= 1
+    else:
         items.pop(item_index)
-        save_items()
-
-    return redirect(url_for("index"))
+    save_items()
+    return redirect(url_for('index'))
 
 @app.route('/change_quantity/<int:item_index>/<string:action>', methods=['POST'])
 def change_quantity(item_index, action):
