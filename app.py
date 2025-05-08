@@ -199,7 +199,7 @@ def add_item():
         
     elif list_choice == "Cart":
         quantity_input = request.form.get("quantity", "").strip()
-        quantity = quantity_input if quantity input else "1"
+        quantity = quantity_input if quantity_input else "1"
         grocery.append({
             "name": name,
             "category": category,
