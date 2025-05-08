@@ -42,7 +42,7 @@ class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message='Passwords do not match. Please try again.')])
     submit = SubmitField('Sign Up')
 
 class LoginForm(FlaskForm):
@@ -55,11 +55,20 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        user = User(
+            username=form.username.data,
+            email=form.email.data,
+            password=hashed_password
+        )
         db.session.add(user)
         db.session.commit()
+
         flash('Your account has been created! Return to the log in page.', 'success')
         return redirect(url_for('login'))
+    elif request.method == "POST":
+        for field_name, error_list in form.errors.items():
+            for error in error_list:
+                flash(error, 'danger')
     return render_template('register.html', form=form)
 
 @app.route("/", methods=["GET", "POST"])
