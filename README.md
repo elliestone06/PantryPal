@@ -1,17 +1,67 @@
-Features so far.
+# PantryPal 🍽️
 
-1. You can enter an item's name, category, and expiration date.
-2. If you do not want to type the date, click the calendar icon to select a date from the calendar.
-3. The right side of the screen updates as a list with the item's name, category, and expiration date.
-4. You can delete an item from the list by clicking the "X" button next to it.
-5. The list automatically saves to the data.json file as itis edited or updated.
-6. not sure if it works yet, but it shouldddd be able to take in the barcode scan as a keyboard input, and it should get info from open food api.
-7. Login/Register functions
-8. Functional recipe generator that takes items in inventory and searches for recipes using API
-9. sort items by expiration date
+> 🏆 **Makers Award Winner – Freshmen Year Project Showcase 2025, Louisiana Tech University**  
+> 🎓 Developed to conclude our Freshman Year as part of the **Living with Cyber** curriculum
 
+PantryPal is a pantry management web application built to help users reduce food waste, track their kitchen inventory, and simplify grocery planning. Whether you're scanning items, organizing your pantry, or generating recipes based on your available ingredients, PantryPal streamlines the way users manage their food.
 
-FUTURE EDITS 
-1. Phone/Rasberry Pi implementation
-2. add notifcation system
-3. Polish the sign up/sign in/view account htmls
+---
+
+## 💡 Core Features
+
+### 🧾 Account System
+Users can register accounts using their email, enabled through Python's SQLAlchemy. Each account provides personalized inventory tracking.
+
+### 🍎 Item Entry
+Users can manually add items or scan barcodes to auto-fill information using the Open Food Facts API. Users provide the quantity and expiration date; everything else is fetched for them.
+
+### 📦 Inventory + Grocery List
+Items are organized by category and expiration date. A separate grocery list allows users to track items they plan to purchase.
+
+### 🍳 Recipe Generation
+With a single click, PantryPal generates a unique recipe based on what's in your pantry — including the recipe name, required ingredients, quantities, and preparation steps.
+
+---
+
+## 🛠️ Technology Breakdown
+
+- **HTML**
+- **CSS (Tailwind CSS)**
+- **JavaScript**
+- **Python**
+- **Flask**
+- **JSON**
+- **Open Food Facts API**
+
+---
+
+## 🧪 Future Plans
+
+- Enhanced account personalization (profile pictures, allergy filters, family sharing)
+- AI-assisted recipe suggestions
+- Multi-user household inventory
+- Mobile responsiveness & offline support
+
+---
+
+## 👥 The Team
+
+This project was created as a final project for Louisiana Tech’s **Living with Cyber** program and presented at the **Freshmen Expo 2025**.
+
+| Name                | Major                |
+|---------------------|----------------------|
+| Aayush Kumar KC     | Computer Science     |
+| Casey Vermillion    | Computer Science     |
+| Ellie Stone         | Cyber Engineering    |
+| Kate Barron         | Cyber Engineering    |
+
+**Faculty Mentor:** Professor Josh Corriell
+
+---
+
+## 🏅 Recognition
+
+🥇 PantryPal was awarded the **Makers Award** for demonstrating practical innovation and outstanding technical implementation at the **Freshmen Expo 2025**.
+
+---
+
